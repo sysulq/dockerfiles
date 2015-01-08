@@ -1,0 +1,126 @@
+# ÅÖÎ¼þÖ # ¿ªͷµÄÐªעÊ
+#
+# ´úÎÆ¼àµØ·£¬Ö¸´¶à4ָ¶¨¶à¼àµØ·£¬Ó·¨£º
+#
+#   listen = protocol://[optional@]server_address:server_port
+#
+# ֧³ֵÄprotocol ÈÏ£º
+#
+# HTTP (Ì¹© http ´ú
+#   listen = http://127.0.0.1:7777
+#
+#   ÉÃµÄý¬cow É³ɵÄPAC url Ϊ http://127.0.0.1:7777/pac
+#
+# cow (Ð}¸öw ·þÎÆÅºÏ¹Ó):
+#   listen = cow://encrypt_method:password@1.2.3.4:5678
+#
+#   È 1.2.3.4:5678 Ô¹úλÓ¹ú cow ÅÖÆΪ¶þ¼¶´ú£¬}¸öw ֮¼äÒ
+#   ͨ¹ý¬½Ӵ«Ê http ´ú¡£ĿǰµļÓܲÉÃëhadowsocks Ïͬµķ½ʽ¡£
+#
+# ÆË˵Ã£º
+# - È server_address Ϊ 0.0.0.0£¬¼à±¾»ú IP µØ·
+# - ¿ÉÔÃçÓ·¨ָ¶¨ PAC Ö·µ»صĴúÎÆµØ·£¨µ±ʹÓ¶˿Ú³É½« http ´ú¹©¸øʱʹÓ£©
+#   listen = http://127.0.0.1:7777 1.2.3.4:5678
+#
+listen = cow://aes-128-cfb:password@0.0.0.0:8388
+
+# È־Î¼þ·¾¶£¬È²»ָ¶¨ÔÊ³östdout
+#logFile =
+
+# COW ĬÈ½ö»ǽÍվʹÓ¶þ¼¶´ú ÏÃѡÏÉÖΪ true ºóùվ¶¼ͨ¹ýúÎ
+#alwaysProxy = false
+
+# ָ¶¨¶à¶þ¼¶´úʹÓµĸºÔ¾ùÂ£¬¿É¡²ßÔç
+#
+#   backup:  ĬÈ²ßԣ¬ÓÏʹÓµÚ»¸ö¨µĶþ¼¶´úÆË½ö¸·Ý¹Ó
+#   hash:    ¸ùÇµÄhost name£¬ÓÏʹÓ hash µ½µÄ³һ¸ö¶´ú   latency: ÓÏѡÔl½ÓӳÙîµĶþ¼¶´ú
+# һ¸ö¶´ú½Ó§°ܺó4γ¢ÊÆË¶þ¼¶´ú ʧ°ܵĶþ¼¶´úÒһ¶¨µĸÅÊٴγ¢ÊʹÓ£¬Ò´˻ָ´ºóØÂô#loadBalance = backup
+
+#############################
+# ָ¶¨¶þ¼¶´ú############################
+
+# ¶þ¼¶´úһʹÓÏÁÓ·¨ָ¶¨£º
+#
+#   proxy = protocol://[authinfo@]server:port
+#
+# Ö¸´ʹÓ proxy ¶àָ¶¨¶à¶þ¼¶´úbackup ²ßԽ«°´Õ¶þ¼¶´úÏµÄ³Ð4ʹÓ
+#
+# Ŀǰ֧³ֵĶþ¼¶´úÅÖ¾Ùý# SOCKS5:
+#   proxy = socks5://127.0.0.1:1080
+#
+# HTTP:
+#   proxy = http://127.0.0.1:8080
+#   proxy = http://user:password@127.0.0.1:8080
+#
+#   Ó»§È֤ÐϢΪ¿É¡Ï
+#
+# shadowsocks:
+#   proxy = ss://encrypt_method:password@1.2.3.4:8388
+#
+#   authinfo Öָ¶¨¼Óܷ½·¨ºÍÜ룬ËÓ֧³ֵļÓܷ½·¨ÈÏ£º
+#     aes-128-cfb, aes-192-cfb, aes-256-cfb,
+#     bf-cfb, cast5-cfb, des-cfb, rc4-md5, rc4, table
+#   Í¼öÃaes-128-cfb
+#
+# cow:
+proxy = cow://aes-128-cfb:password@54.191.82.164:8388
+#
+#   authinfo Ó shadowsocks Ïͬ
+
+
+#############################
+# ִÐ ssh ÃÁ´´½¨ SOCKS5 ´ú############################
+
+# ÏÃµÄ¡Ï¿ÉÔÃCOW ִÐ ssh ÃÁ´´½¨±¾µØSOCKS5 ´ú²¢Ô ssh ¶Ͽªºó¬
+# COW »á¶¯ʹÓͨ¹ýÃÁ´´½¨µĴúÎÐÔͨ¹ýy ѡÏָ¶¨
+# ¿Éظ´ָ¶¨¶à
+#
+# עÒÕһ¹¦ÄÐҪϵͳÉÒÓ ssh ÃÁ£¬Ç±ØëÓ ssh public key authentication
+#
+# Èָ¶¨¸Ã¡Ï£¬COW ½«ִÐÒÏÃÁ£º
+#     ssh -n -N -D <local_socks_port> -p <server_ssh_port> <user@server>
+# server_ssh_port ¶˿ڲ»ָ¶¨ÔĬÈΪ 22
+# È¹û¶¨ÆË ssh ѡÏ£¬ÇÐ¸Ä~/.ssh/config
+#sshServer = user@server:local_socks_port[:server_ssh_port]
+
+#############################
+# È֤
+#############################
+
+# ָ¶¨ÔÐµÄIP »òøÍ¶νöÖIPv4£¬¿ÉÔ¸¶¨ IPv6 µØ·£¬Ó¶ººŷָôö# ʹÓ´Ë¡Ïʱ±ðËí 127.0.0.1£¬·ñ¾»úҲÐҪÈ֤
+#allowedClient = 127.0.0.1, 192.168.1.0/24, 10.0.0.0/8
+
+# ҪÇ¿ͻ§¶Ë¨¹ýûÈ֤
+# COW ×ÊÏÑ֤ IP Ê·ñallowedClient Ö£¬È²»ÔÆÖÔͨ¹ýûÈ֤
+#userPasswd = username:password
+
+# ÈÐָ¶¨¶àÓ»§ÃÃÂ£¬¿ÉÚÂæÏָ¶¨µÄļþÖÁ³öļþÖÿÐÄÈÈÏ
+#   username:password[:port]
+# port Ϊ¿É¡Ï£¬Èָ¶¨£¬Ô¸Ãû§ֻÄ´Ó¸¶¨¶˿Ú¬½ÓCOW
+# עÒ£ºÈÓÖ¸´Ó»§£¬COW »ᱨ´í³öserPasswdFile = /path/to/file
+
+# È֤ʧЧʱ¼ä Ó·¨£º2h3m4s ±í 2 Сʱ 3 ·ÖÓ4 Ã
+#authTimeout = 2h
+
+#############################
+# ¸߼¶ѡÏ
+#############################
+
+# ½«ָ¶¨µÄHTTP error code ÈΪÊ±»¸Éţ¬ʹÓ¶þ¼¶´úÊ£¬ĬÈΪ¿Õ#httpErrorCode =
+
+# ×¶àÐʹÓ¶à¸öU ºË#core = 2
+
+# ÔÐ½¨bËµÀ¬½ӵĶ˿ڣ¬¶à¶˿Úöººŷָ����Éظ´¶à
+# ĬÈ×ÊÔÐÏÁ·þÎµĶ˿Ú ssh, http, https, rsync, imap, pop, jabber, cvs, git, svn
+# ÈÐÔÐÆË¶˿ڣ¬ÇÓ¸Ã¡ÏÌ¼Ó# ÏÖËµÀ¬½ӵĶ˿ڿÉԷÀ¹½«ÔÐ COW µķþÎÆÉֻ¼à±¾»úµķþÎ±©¶¸ø
+#tunnelAllowedPort = 80, 443
+
+# GFW »á DNS ½â³¬ʱ£¬Ҳ¿Éܷµ»شíµĵØ·£¬Äl½ӵ«Ê¶r»µ½ÈºÎÚÝ# ÏÃ}¸öÄ¡һµãÒ¼ÓټìÍվÊ·ñ½£¬µ«ÍÂÇ¿ö±¿ÉÜó
+# ´´½¨l½ӳ¬ʱ£¨Ó·¨¸úhTimeout Ïͬ£©
+#dialTimeout = 5s
+# ´ӷþÎÆ¶s¬ʱ
+#readTimeout = 5s
+
+# »ùlient Ê·ñì±Õ¬½Ó´¼ì SSL ´í£¬ֻ¶ÔChrome ÓЧ
+# £¨Chrome Óµ½ SSL ´í»á½ӹرÕ¬½ӣ¬¶øÈÓ»§ѡÔÊ·ñø ¿Éܽ«¿É±lÍվÎÅΪ±»ǽÍվ£¬µ± GFW ½øSL Ö¼ä¹¥»÷ÉԿ¼ÂʹÓ
+#detectSSLErr = false
