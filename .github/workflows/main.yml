@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-      - name: build protoc
+      - name: protoc
         uses: docker/build-push-action@v2.5.0
         with:
           file: protoc/Dockerfile
