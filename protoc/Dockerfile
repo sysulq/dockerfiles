@@ -121,22 +121,6 @@ RUN find /protoc-gen-javalite/ -name 'lib*.so*' -exec patchelf --set-rpath /prot
         done
 
 
-FROM rust:1.22.1 as rust_builder
-ENV RUST_PROTOBUF_VERSION=1.4.3 \
-        OUTDIR=/out
-RUN mkdir -p ${OUTDIR}
-RUN apt-get update && \
-        apt-get install -y musl-tools
-RUN rustup target add x86_64-unknown-linux-musl
-RUN mkdir -p /rust-protobuf && \
-        curl -L https://github.com/stepancheg/rust-protobuf/archive/v${RUST_PROTOBUF_VERSION}.tar.gz | tar xvz --strip 1 -C /rust-protobuf
-RUN cd /rust-protobuf/protobuf && \
-        RUSTFLAGS='-C linker=musl-gcc' cargo build --target=x86_64-unknown-linux-musl --release
-RUN mkdir -p ${OUTDIR}/usr/bin && \
-        strip /rust-protobuf/target/x86_64-unknown-linux-musl/release/protoc-gen-rust && \
-        install -c /rust-protobuf/target/x86_64-unknown-linux-musl/release/protoc-gen-rust ${OUTDIR}/usr/bin/
-
-
 FROM znly/upx as packer
 COPY --from=protoc_builder /out/ /out/
 RUN upx --lzma \
