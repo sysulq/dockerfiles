@@ -78,49 +78,6 @@ RUN cd ${GOPATH}/src/github.com/pseudomuto/protoc-gen-doc && \
         make build && \
         install -c ${GOPATH}/src/github.com/pseudomuto/protoc-gen-doc/protoc-gen-doc ${OUTDIR}/usr/bin/
 
-
-FROM ubuntu:16.04 as swift_builder
-RUN apt-get update && \
-        apt-get install -y build-essential make tar xz-utils bzip2 gzip sed \
-        libz-dev unzip patchelf curl libedit-dev python2.7 python2.7-dev libxml2 \
-        git libxml2-dev uuid-dev libssl-dev bash patch
-ENV SWIFT_VERSION=4.2.1 \
-        LLVM_VERSION=5.0.2
-RUN curl -L http://releases.llvm.org/${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-16.04.tar.xz | tar --strip-components 1 -C /usr/local/ -xJv
-RUN curl -L https://swift.org/builds/swift-${SWIFT_VERSION}-release/ubuntu1604/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu16.04.tar.gz | tar --strip-components 1 -C / -xz
-
-ENV SWIFT_PROTOBUF_VERSION=1.2.0
-RUN mkdir -p /swift-protobuf && \
-        curl -L https://github.com/apple/swift-protobuf/archive/${SWIFT_PROTOBUF_VERSION}.tar.gz | tar --strip-components 1 -C /swift-protobuf -xz
-RUN apt-get install -y libcurl4-openssl-dev
-RUN cd /swift-protobuf && \
-        swift build -c release
-RUN mkdir -p /protoc-gen-swift && \
-        cp /swift-protobuf/.build/x86_64-unknown-linux/release/protoc-gen-swift /protoc-gen-swift/
-RUN cp /lib64/ld-linux-x86-64.so.2 \
-        $(ldd /protoc-gen-swift/protoc-gen-swift | awk '{print $3}' | grep /lib | sort | uniq) \
-        /protoc-gen-swift/
-RUN find /protoc-gen-swift/ -name 'lib*.so*' -exec patchelf --set-rpath /protoc-gen-swift {} \; && \
-        for p in protoc-gen-swift; do \
-        patchelf --set-interpreter /protoc-gen-swift/ld-linux-x86-64.so.2 /protoc-gen-swift/${p}; \
-        done
-
-FROM ubuntu:16.04 as javalite_builder
-RUN apt-get update && \
-        apt-get install -y bash patch curl patchelf
-ENV PROTOC_GEN_JAVALITE_VERSION=3.0.0
-RUN mkdir -p /protoc-gen-javalite && \
-        curl -L https://repo1.maven.org/maven2/com/google/protobuf/protoc-gen-javalite/${PROTOC_GEN_JAVALITE_VERSION}/protoc-gen-javalite-${PROTOC_GEN_JAVALITE_VERSION}-linux-x86_64.exe > /protoc-gen-javalite/protoc-gen-javalite && \
-        chmod 755 /protoc-gen-javalite/protoc-gen-javalite
-RUN cp /lib64/ld-linux-x86-64.so.2 \
-        $(ldd /protoc-gen-javalite/protoc-gen-javalite | awk '{print $3}' | grep /lib | sort | uniq) \
-        /protoc-gen-javalite/
-RUN find /protoc-gen-javalite/ -name 'lib*.so*' -exec patchelf --set-rpath /protoc-gen-javalite {} \; && \
-        for p in protoc-gen-javalite; do \
-        patchelf --set-interpreter /protoc-gen-javalite/ld-linux-x86-64.so.2 --set-rpath /protoc-gen-javalite /protoc-gen-javalite/${p}; \
-        done
-
-
 FROM znly/upx as packer
 COPY --from=protoc_builder /out/ /out/
 RUN upx --lzma \
@@ -131,12 +88,6 @@ RUN upx --lzma \
 FROM alpine:3.7
 RUN apk add --no-cache libstdc++
 COPY --from=packer /out/ /
-COPY --from=swift_builder /protoc-gen-swift /protoc-gen-swift
-RUN for p in protoc-gen-swift protoc-gen-swiftgrpc; do \
-        ln -s /protoc-gen-swift/${p} /usr/bin/${p}; \
-        done
-COPY --from=javalite_builder /protoc-gen-javalite /protoc-gen-javalite
-RUN ln -s /protoc-gen-javalite/protoc-gen-javalite /usr/bin/protoc-gen-javalite
 
 RUN apk add --no-cache curl && \
         mkdir -p /protobuf/google/protobuf && \
