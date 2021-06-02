@@ -131,7 +131,6 @@ RUN upx --lzma \
 FROM alpine:3.7
 RUN apk add --no-cache libstdc++
 COPY --from=packer /out/ /
-COPY --from=rust_builder /out/ /
 COPY --from=swift_builder /protoc-gen-swift /protoc-gen-swift
 RUN for p in protoc-gen-swift protoc-gen-swiftgrpc; do \
         ln -s /protoc-gen-swift/${p} /usr/bin/${p}; \
